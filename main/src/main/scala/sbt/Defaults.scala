@@ -180,7 +180,7 @@ object Defaults extends BuildCommon {
     sourceManaged <<= configSrcSub(sourceManaged),
     scalaSource := sourceDirectory.value / "scala",
     javaSource := sourceDirectory.value / "java",
-    unmanagedSourceDirectories := Seq(scalaSource.value, javaSource.value),
+    unmanagedSourceDirectories := Seq(scalaSource.value, makeCrossSource(scalaSource.value, scalaBinaryVersion.value, crossPaths.value), javaSource.value),
     unmanagedSources <<= collectFiles(unmanagedSourceDirectories, includeFilter in unmanagedSources, excludeFilter in unmanagedSources),
     watchSources in ConfigGlobal <++= unmanagedSources,
     managedSourceDirectories := Seq(sourceManaged.value),
@@ -240,6 +240,10 @@ object Defaults extends BuildCommon {
     derive(compilersSetting),
     derive(scalaBinaryVersion := binaryScalaVersion(scalaVersion.value))
   ))
+
+  def makeCrossSource(srcDir: File, sv: String, cross: Boolean): File =
+    if (cross) Path(srcDir.getParent) / s"${srcDir.name}-${sv}" else srcDir
+
   def makeCrossTarget(t: File, sv: String, sbtv: String, plugin: Boolean, cross: Boolean): File =
     {
       val scalaBase = if (cross) t / ("scala-" + sv) else t
@@ -947,7 +951,7 @@ object Defaults extends BuildCommon {
   @deprecated("Settings now split into AutoPlugins.", "0.13.2")
   lazy val projectBaseSettings: Seq[Setting[_]] = projectCore ++ runnerSettings ++ paths ++ baseClasspaths ++ baseTasks ++ compileBase ++ disableAggregation
 
-  // These are project level settings that MUST be on every project.  
+  // These are project level settings that MUST be on every project.
   lazy val coreDefaultSettings: Seq[Setting[_]] =
     projectCore ++ disableAggregation ++ Seq(
       // Missing but core settings
@@ -1110,8 +1114,8 @@ object Classpaths {
     projectResolver <<= projectResolverTask,
     projectDependencies <<= projectDependenciesTask,
     // TODO - Is this the appropriate split?  Ivy defines this simply as
-    //        just project + library, while the JVM plugin will define it as 
-    //        having the additional sbtPlugin + autoScala magikz. 
+    //        just project + library, while the JVM plugin will define it as
+    //        having the additional sbtPlugin + autoScala magikz.
     allDependencies := {
       projectDependencies.value ++ libraryDependencies.value
     },
