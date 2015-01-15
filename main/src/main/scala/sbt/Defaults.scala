@@ -242,7 +242,7 @@ object Defaults extends BuildCommon {
   ))
 
   def makeCrossSource(srcDir: File, sv: String, cross: Boolean): File =
-    if (cross) Path(srcDir.getParent) / s"${srcDir.name}-$sv" else srcDir
+    if (cross) srcDir.getParentFile / s"${srcDir.name}-$sv" else srcDir
 
   def makeCrossTarget(t: File, sv: String, sbtv: String, plugin: Boolean, cross: Boolean): File =
     {
