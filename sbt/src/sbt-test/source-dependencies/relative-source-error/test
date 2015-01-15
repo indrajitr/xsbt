@@ -1,7 +1,9 @@
 $ copy-file changes/relative.sbt build.sbt
+$ exec pwd
 > reload
 -> compile
 
 $ copy-file changes/absolute.sbt build.sbt
+$ exec pwd
 > reload
 > compile
